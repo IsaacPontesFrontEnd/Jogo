@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#050508" />
+    <meta
+      name="description"
+      content="VIGILIA, a standalone browser-native horror card game."
+    />
+    <title>VIGILIA</title>
+    <link rel="stylesheet" href="./standalone/styles.css" />
+  </head>
+  <body>
+    <div id="app" class="app"></div>
+    <div id="overlay" class="overlay">
+      <div class="film-grain"></div>
+      <div class="crt-scanlines"></div>
+      <div class="crt-vignette"></div>
+      <div class="crt-flicker"></div>
+      <div id="screen-tear" class="screen-tear" style="display: none"></div>
+    </div>
+    <noscript>
+      <p style="color:#d9c9a8;font-family:monospace;text-align:center;padding:2rem">
+        JavaScript precisa estar ativado.<br>JavaScript must be enabled.
+      </p>
+    </noscript>
+    <script type="module" src="./standalone/src/main.js"></script>
+  </body>
+</html>

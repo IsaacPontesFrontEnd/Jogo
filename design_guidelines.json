@@ -1,0 +1,75 @@
+{
+  "theme": "dark",
+  "archetype": "5 (Jewel & Luxury / Moody & Cinematic -> Deep Horror)",
+  "concept": "Moonlit Graveyard",
+  "colors": {
+    "background_global": "#050508",
+    "surface_safe": "#15161A",
+    "surface_shadow": "#020203",
+    "text_primary": "#E2DCD0",
+    "text_muted": "#5F7182",
+    "accent_blood": "#8A251C",
+    "accent_glow": "#A83025",
+    "border_diegetic": "#2A2C38",
+    "border_hover": "#5F7182"
+  },
+  "typography": {
+    "narrative_and_headings": {
+      "family": "'Special Elite', monospace",
+      "usage": "NPC dialogues, story text, game over screen, main menu options",
+      "style": "tracking-widest, rough, unsettling"
+    },
+    "ui_and_stats": {
+      "family": "'VT323', monospace",
+      "usage": "Card stats, health indicators, deck count, UI buttons",
+      "style": "pixel-perfect, image-rendering: pixelated"
+    }
+  },
+  "visual_effects": {
+    "crt_overlay": "Fixed screen-size div with pointer-events-none. CSS: `background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%); background-size: 100% 2px;`",
+    "vignette": "Fixed screen-size div. CSS: `background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.95) 120%); pointer-events: none;`",
+    "film_grain": "CSS noise/SVG filter applied subtly across the background to give a gritty texture.",
+    "glitch_animations": "Keyframes alternating X/Y translation by 1-2px and rapid opacity shifts for critical moments or Shadow World transitions.",
+    "pixel_art_rendering": "Apply `image-rendering: pixelated;` to all SVG graphics and game containers to enforce sharp, retro aesthetics."
+  },
+  "layout_and_spaces": {
+    "global": "Asymmetric, dark, focused on negative space.",
+    "safe_environment": "Stable CSS Grid layouts, slower transitions, slightly warmer surface tones (#15161A), calm breathing animations on selected elements.",
+    "shadow_world": "Jittery, distorted layouts. Cooler, abyssal background (#020203), harsh red accents, sudden glitch micro-animations.",
+    "battle_board": "2 rows (Enemy vs Player). 4 slots each. Diegetic perspective: use CSS `perspective` and `rotateX` to make the board feel like it's resting on a physical table in front of the player."
+  },
+  "components": {
+    "cards": {
+      "structure": "HTML/SVG based (NO external images). Render pixel art icons using SVG `<rect>` elements or CSS grid painting.",
+      "style": "Dark border (#2A2C38), bone-white text, deep abyssal background. Stats distinctly placed at bottom corners.",
+      "interactions": "On hover, card tilts up `transform: perspective(600px) rotateX(10deg) translateY(-10px) scale(1.05)`. Fast, snappy ease-out."
+    },
+    "npc_dialogue": {
+      "style": "Visual Novel text box at bottom. Typewriter effect (reveal letter by letter). Special Elite font.",
+      "indicator": "Blinking cursor `_` or pulsing pixel block at the end of text."
+    },
+    "buttons": {
+      "style": "Text-based with brackets (e.g., `> PLAY <`) or diegetic carved rectangles. Hover triggers text-shadow glow (`text-shadow: 0 0 8px #8A251C;`) or subtle X-axis jitter."
+    },
+    "map_nodes": {
+      "style": "SVG circles/diamonds connected by jagged SVG paths. Current node pulses slowly."
+    }
+  },
+  "media_and_assets": {
+    "images": "FORBIDDEN. User specifically requested 'Pixel art gerada via CSS/SVG (sem imagens externas)'. All visuals must be code-generated.",
+    "audio": "Synthesized via Web Audio API (as requested). Implement low frequency oscillators (LFO) for ambient hums and sharp square waves for glitches."
+  },
+  "accessibility_and_testing": {
+    "data_testid": "CRITICAL: All interactive elements (cards, menu options, dialogue next buttons, save toggles) MUST have a kebab-case `data-testid` attribute (e.g., `data-testid='card-slot-1'`, `data-testid='start-run-button'`)."
+  },
+  "instructions_to_main_agent": [
+    "Build the application in React using .js/.jsx files (no TypeScript as per environment setup).",
+    "Use Tailwind CSS for styling, extending the theme with the colors and fonts defined above.",
+    "Include Google Fonts 'Special Elite' and 'VT323' in the public index.html or via next/font if applicable.",
+    "Create a global Wrapper component that renders the CRT scanlines and vignette above all children.",
+    "Implement the state toggle between 'Safe Environment' and 'Shadow World' via a React Context that switches a CSS class on the root element, altering global CSS variables.",
+    "Strictly generate card artwork using SVG primitive shapes (rects, polygons) mimicking pixel art. Do not use <img> tags with external sources.",
+    "Ensure the Battle Board uses CSS 3D transforms (`perspective`, `rotateX`) to look like a physical playing surface.",
+    "Verify all functional interactions (clicks, hovers) are trackable via `data-testid`."
+  ]
+}

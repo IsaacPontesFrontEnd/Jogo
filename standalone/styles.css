@@ -1,0 +1,354 @@
+:root {
+  --bg-global: #050508;
+  --surface-safe: #15161a;
+  --surface-shadow: #020203;
+  --text-primary: #e2dcd0;
+  --text-muted: #5f7182;
+  --accent-blood: #8a251c;
+  --accent-glow: #a83025;
+  --accent-bone: #d9c9a8;
+  --border-diegetic: #2a2c38;
+  --border-hover: #5f7182;
+}
+
+* { box-sizing: border-box; }
+html, body, #app { height: 100%; margin: 0; padding: 0; }
+body {
+  background-color: var(--bg-global);
+  color: var(--text-primary);
+  font-family: "VT323", monospace;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+.app.shadow-realm { background-color: var(--surface-shadow); }
+
+img, svg { -webkit-user-drag: none; user-select: none; }
+button { font: inherit; }
+
+/* ===== Overlays ===== */
+.overlay { position: fixed; inset: 0; pointer-events: none; z-index: 9000; }
+.crt-scanlines {
+  position: fixed; inset: 0;
+  background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.18) 50%);
+  background-size: 100% 3px; mix-blend-mode: multiply; z-index: 9000;
+}
+.crt-vignette {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.55) 80%, rgba(0,0,0,0.95) 120%);
+  z-index: 9001;
+}
+.crt-flicker { position: fixed; inset: 0; background: rgba(255,255,255,0.015); z-index: 9002; animation: flicker 7s infinite; }
+.film-grain {
+  position: fixed; inset: 0; opacity: 0.08; z-index: 8999;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='1'/></svg>");
+}
+.screen-tear {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9100;
+  background: linear-gradient(90deg, rgba(168,48,37,0.18), rgba(0,255,247,0.12), rgba(168,48,37,0.18));
+  mix-blend-mode: screen;
+  animation: screen-tear .4s steps(4) 1;
+}
+.shadow-realm + .overlay .crt-scanlines, .app.shadow-realm ~ .overlay .crt-scanlines {
+  background: linear-gradient(rgba(40,0,0,0) 50%, rgba(50,0,0,0.25) 50%);
+  background-size: 100% 3px;
+}
+
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 0.99; }
+  20%, 24%, 55% { opacity: 0.6; }
+}
+@keyframes screen-tear {
+  0%,100% { clip-path: inset(0 0 0 0); transform: translate(0,0); }
+  20% { clip-path: inset(20% 0 30% 0); transform: translate(-3px,0); }
+  40% { clip-path: inset(60% 0 5% 0); transform: translate(3px,0); }
+  60% { clip-path: inset(10% 0 70% 0); transform: translate(-2px,0); }
+}
+
+/* ===== Typography ===== */
+.font-narrative { font-family: "Special Elite", "Courier New", monospace; letter-spacing: 0.04em; }
+.font-display { font-family: "IM Fell English SC", serif; letter-spacing: 0.05em; }
+.font-ui { font-family: "VT323", monospace; letter-spacing: 0.02em; }
+
+/* ===== Buttons ===== */
+.btn-diegetic {
+  font-family: "Special Elite", monospace;
+  background: transparent; color: var(--text-primary); border: none;
+  padding: .5rem 1rem; cursor: pointer; letter-spacing: 0.15em;
+  text-transform: uppercase; transition: text-shadow .2s, color .2s, transform .15s;
+}
+.btn-diegetic:hover { color: var(--accent-bone); text-shadow: 0 0 8px var(--accent-glow); transform: translateX(2px); }
+.btn-diegetic:disabled { opacity: .3; cursor: not-allowed; }
+.btn-bracket::before { content: "[ "; color: var(--accent-blood); }
+.btn-bracket::after  { content: " ]"; color: var(--accent-blood); }
+
+/* ===== Glitch ===== */
+.glitch { position: relative; animation: glitch-shake 0.3s infinite; }
+.glitch::before, .glitch::after {
+  content: attr(data-text); position: absolute; inset: 0; pointer-events: none;
+}
+.glitch::before { color: #00fff7; transform: translate(-2px,0); mix-blend-mode: screen; opacity: .7; }
+.glitch::after  { color: var(--accent-blood); transform: translate(2px,0); mix-blend-mode: screen; opacity: .7; }
+@keyframes glitch-shake {
+  0%,100% { transform: translate(0,0); }
+  25% { transform: translate(1px,-1px); }
+  50% { transform: translate(-1px,1px); }
+  75% { transform: translate(1px,1px); }
+}
+
+/* Breathing */
+@keyframes breathe { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+.breathe { animation: breathe 3s ease-in-out infinite; }
+@keyframes breathe-slow { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+.breathe-slow { animation: breathe-slow 4s ease-in-out infinite; }
+
+/* Blink */
+@keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+.cursor-blink::after { content: "_"; animation: blink 1s steps(1) infinite; color: var(--accent-glow); margin-left: 4px; }
+
+/* Map node pulse */
+@keyframes node-pulse {
+  0%,100% { filter: drop-shadow(0 0 4px var(--accent-glow)); }
+  50% { filter: drop-shadow(0 0 14px var(--accent-glow)); }
+}
+.node-current { animation: node-pulse 1.8s ease-in-out infinite; }
+
+/* ===== CARDS ===== */
+.h-card {
+  position: relative;
+  width: 132px; height: 192px;
+  background: linear-gradient(180deg, #0c0d10 0%, #15161a 100%);
+  border: 3px solid var(--border-diegetic);
+  color: var(--text-primary);
+  transition: transform .18s ease-out, border-color .2s, box-shadow .2s;
+  user-select: none; cursor: pointer;
+  box-shadow: inset 0 0 14px rgba(0,0,0,.92), 0 4px 6px rgba(0,0,0,.6);
+}
+.h-card.small { width: 104px; height: 152px; }
+.h-card:hover {
+  transform: perspective(700px) rotateX(8deg) translateY(-14px) scale(1.06);
+  border-color: var(--accent-glow);
+  box-shadow: inset 0 0 8px rgba(0,0,0,.6), 0 10px 24px rgba(168,48,37,.5), 0 0 28px rgba(168,48,37,.3);
+  z-index: 50;
+}
+.h-card.selected {
+  border-color: var(--accent-glow);
+  border-width: 4px;
+  box-shadow: 0 0 22px var(--accent-glow), inset 0 0 8px var(--accent-blood);
+  transform: translateY(-16px) scale(1.04);
+}
+.h-card.disabled { opacity: .45; cursor: not-allowed; filter: grayscale(0.5); }
+.h-card .cost {
+  position: absolute; top: 4px; left: 6px;
+  color: var(--accent-glow); font-family: "VT323", monospace; font-size: 18px;
+  display: flex; align-items: center; gap: 3px;
+}
+.h-card .name {
+  position: absolute; top: 4px; right: 6px; max-width: 80px; text-align: right;
+  color: var(--text-primary); font-family: "Special Elite", monospace;
+  font-size: 11px; line-height: 1.1;
+}
+.h-card .sprite {
+  position: absolute; top: 30px; left: 0; right: 0; display: flex; justify-content: center;
+}
+.h-card .sprite-box { background: rgba(0,0,0,.5); border: 1px solid var(--border-diegetic); padding: 2px; }
+.h-card .atk {
+  position: absolute; bottom: 4px; left: 6px;
+  color: var(--accent-glow); font-family: "VT323", monospace; font-size: 22px;
+}
+.h-card .hp {
+  position: absolute; bottom: 4px; right: 6px;
+  color: var(--accent-bone); font-family: "VT323", monospace; font-size: 22px;
+}
+
+.h-slot {
+  width: 132px; height: 192px;
+  border: 1px dashed var(--border-diegetic);
+  background: rgba(5,5,8,.5); display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.h-slot.small { width: 104px; height: 152px; }
+.h-slot.valid-target {
+  border-color: var(--accent-glow);
+  box-shadow: inset 0 0 14px var(--accent-blood);
+  animation: pulse-target 1s infinite;
+}
+@keyframes pulse-target { 0%,100% { opacity: 1; } 50% { opacity: .6; } }
+
+/* ===== Main Menu ===== */
+.menu { width: 100%; height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; position: relative; }
+.menu .title {
+  font-family: "IM Fell English SC", serif;
+  font-size: 5rem; letter-spacing: 0.4em; color: var(--text-primary);
+  text-shadow: 0 0 24px rgba(168,48,37,.3);
+}
+.menu .subtitle {
+  font-family: "Special Elite", monospace;
+  font-size: .9rem; margin-top: 1rem; letter-spacing: .15em; color: var(--text-muted);
+}
+.menu nav { display: flex; flex-direction: column; gap: .75rem; align-items: flex-start; margin-top: 3rem; font-size: 1.25rem; }
+.menu .candle { position: absolute; bottom: 2rem; width: 8px; height: 8px;
+  background: var(--accent-glow); box-shadow: 0 0 16px var(--accent-glow); opacity: .6; }
+
+/* ===== Safe Environment ===== */
+.safe { width: 100%; height: 100%; padding: 2rem; display: flex; flex-direction: column; }
+.safe header h2 { font-family: "IM Fell English SC", serif; font-size: 2rem; letter-spacing: .15em; margin: 0; color: var(--text-primary); }
+.safe header p { font-family: "Special Elite", monospace; font-size: .85rem; margin: .25rem 0 0; color: var(--text-muted); }
+.safe-body { flex: 1; display: grid; grid-template-columns: 1fr 1.2fr; gap: 2rem; margin-top: 1rem; }
+.safe-options { display: flex; flex-direction: column; align-items: flex-start; gap: .75rem; font-size: 1.05rem; }
+.safe-options .saved { font-family: "Special Elite", monospace; font-size: .85rem; color: var(--accent-glow); }
+.safe-stats { margin-top: 2rem; font-size: .85rem; opacity: .75; line-height: 1.6; }
+.cabin-scene { position: relative; min-height: 360px; background: linear-gradient(180deg, #0a0b0e 0%, #15161a 70%, #08080b 100%); }
+.cabin-window {
+  position: absolute; top: 2rem; left: 3rem; width: 160px; height: 180px;
+  border: 4px solid var(--border-diegetic);
+  background: radial-gradient(circle at 30% 30%, #1a1f2d 0%, #050508 80%);
+}
+.cabin-window::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border-diegetic); }
+.cabin-window::after  { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--border-diegetic); }
+.cabin-moon {
+  position: absolute; top: 1rem; right: 1rem; width: 24px; height: 24px;
+  border-radius: 50%; background: #d9c9a8;
+  box-shadow: 0 0 24px rgba(217,201,168,.4);
+}
+.cabin-candle { position: absolute; bottom: 4rem; right: 4rem; text-align: center; }
+.cabin-candle .flame { width: 14px; height: 14px; margin: 0 auto; border-radius: 50%;
+  background: var(--accent-glow); box-shadow: 0 0 18px var(--accent-glow), 0 0 36px rgba(168,48,37,.4); animation: breathe 3s infinite; }
+.cabin-candle .wax { width: 6px; height: 40px; margin: 4px auto 0; background: var(--accent-bone); }
+.cabin-candle .holder { width: 60px; height: 6px; margin: 4px auto 0; background: var(--border-diegetic); }
+.cabin-mirror {
+  position: absolute; bottom: 2rem; left: 3rem; width: 90px; height: 140px;
+  border: 4px solid var(--accent-blood); cursor: pointer;
+  background: linear-gradient(180deg, #0c0c0f 0%, #1a0a0a 50%, #0c0c0f 100%);
+}
+.cabin-mirror::before { content: ""; position: absolute; inset: .5rem;
+  background: radial-gradient(circle at 50% 30%, rgba(168,48,37,.18), transparent 60%); animation: breathe 3s infinite; }
+
+/* ===== Modals ===== */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 9050;
+  display: flex; align-items: center; justify-content: center; }
+.modal { background: var(--surface-safe); border: 2px solid var(--border-diegetic); padding: 1.5rem; max-width: 800px; width: 90%; }
+.modal h3 { font-family: "IM Fell English SC", serif; font-size: 1.5rem; letter-spacing: .15em; margin: 0 0 1rem; }
+.modal-grid { display: flex; flex-wrap: wrap; gap: .75rem; max-height: 460px; overflow-y: auto; padding: .5rem; }
+.modal-actions { margin-top: 1rem; }
+.npc-modal { position: fixed; left: 0; right: 0; bottom: 0; z-index: 9050; }
+.npc-modal .inner { max-width: 800px; margin: 1rem auto; padding: 1.5rem;
+  background: var(--surface-safe); border: 2px solid var(--border-diegetic); }
+.npc-label { font-family: "Special Elite", monospace; font-size: .7rem; letter-spacing: .15em; color: var(--accent-glow); margin-bottom: .5rem; }
+.npc-text { font-family: "Special Elite", monospace; font-size: 1.15rem; line-height: 1.6; min-height: 3.5rem; }
+.npc-actions { margin-top: 1rem; text-align: right; }
+
+/* ===== Shadow World ===== */
+.shadow { width: 100%; height: 100%; padding: 2rem; display: flex; flex-direction: column; }
+.shadow header h2 { font-family: "IM Fell English SC", serif; font-size: 2rem; letter-spacing: .15em; margin: 0; color: var(--accent-glow); }
+.shadow header p { font-family: "Special Elite", monospace; font-size: .85rem; margin: .25rem 0 0; color: var(--text-muted); }
+.map-container { flex: 1; display: flex; align-items: center; justify-content: center; }
+.map-legend { font-family: "VT323", monospace; font-size: .85rem; color: var(--text-muted); display: flex; gap: 1.5rem; }
+
+/* ===== Battle ===== */
+.battle { width: 100%; height: 100%; display: grid;
+  grid-template-columns: 280px 1fr 320px; grid-template-rows: auto 1fr auto;
+  gap: 1rem; padding: 1rem; background-color: var(--surface-shadow); }
+.battle-top { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
+.hp-block { display: flex; align-items: center; gap: .5rem; font-family: "VT323", monospace; }
+.hp-block .icon { font-size: 1.8rem; line-height: 1; }
+.hp-block.player .icon { color: var(--accent-glow); text-shadow: 0 0 12px var(--accent-glow); }
+.hp-block.enemy .icon { color: var(--accent-bone); text-shadow: 0 0 12px var(--text-muted); }
+.hp-block .value { font-size: 2.5rem; color: var(--text-primary); line-height: 1; }
+.hp-block .max { font-size: 1rem; color: var(--text-muted); }
+.hp-block .label { font-family: "Special Elite", monospace; font-size: .7rem; letter-spacing: .2em; color: var(--text-muted); display: block; }
+.hp-bar { width: 200px; height: 12px; border: 2px solid var(--border-diegetic); background: #0a0a0d; margin-top: 4px; position: relative; }
+.hp-bar .fill { height: 100%; transition: width .5s ease-out; }
+.hp-bar.player .fill { background: var(--accent-glow); box-shadow: 0 0 8px var(--accent-glow); }
+.hp-bar.enemy  .fill { background: var(--accent-bone); }
+
+.turn-indicator { text-align: center; }
+.turn-indicator .label {
+  font-family: "IM Fell English SC", serif;
+  font-size: 1.75rem; letter-spacing: .3em;
+  padding: .5rem 1.5rem; border: 2px solid var(--accent-blood);
+  text-shadow: 0 0 14px var(--accent-glow);
+}
+.turn-indicator.player .label { color: var(--accent-glow); animation: breathe 2s infinite; }
+.turn-indicator.enemy .label  { color: var(--text-muted); border-color: var(--border-diegetic); }
+.turn-indicator .turn-num { font-family: "VT323", monospace; font-size: .9rem; color: var(--text-muted); margin-top: .25rem; }
+
+/* Side panels */
+.battle-side { background: rgba(10,11,16,.85); border: 1px solid var(--border-diegetic); padding: 1rem; overflow-y: auto; }
+.battle-side h4 { font-family: "Special Elite", monospace; font-size: .75rem; letter-spacing: .25em;
+  color: var(--accent-glow); margin: 0 0 .75rem; text-transform: uppercase; }
+
+.card-info { display: flex; flex-direction: column; gap: .5rem; font-size: .95rem; }
+.card-info .ci-name { font-family: "IM Fell English SC", serif; font-size: 1.25rem; color: var(--text-primary); }
+.card-info .ci-stats { display: flex; gap: 1rem; font-family: "VT323", monospace; }
+.card-info .ci-stats span { color: var(--text-primary); }
+.card-info .ci-stats .blood { color: var(--accent-glow); }
+.card-info .ci-stats .atk { color: var(--accent-glow); }
+.card-info .ci-stats .hp { color: var(--accent-bone); }
+.card-info .ci-desc { font-family: "Special Elite", monospace; font-size: .85rem; line-height: 1.5; color: var(--text-muted); margin-top: .5rem; }
+.card-info .ci-effect { font-family: "Special Elite", monospace; font-size: .8rem; color: var(--accent-glow); margin-top: .25rem; }
+.card-info .empty { font-family: "Special Elite", monospace; font-size: .85rem; color: var(--text-muted); font-style: italic; }
+
+.last-action { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-diegetic); }
+.last-action .la-side { font-family: "Special Elite", monospace; font-size: .7rem; letter-spacing: .25em; }
+.last-action .la-side.player { color: var(--accent-glow); }
+.last-action .la-side.enemy  { color: var(--text-muted); }
+.last-action .la-text { font-family: "Special Elite", monospace; font-size: .95rem; margin-top: .25rem; color: var(--text-primary); }
+.last-action .empty { font-family: "Special Elite", monospace; font-size: .8rem; color: var(--text-muted); font-style: italic; }
+
+.combat-log { max-height: 100%; overflow-y: auto; font-family: "Special Elite", monospace; font-size: .8rem; line-height: 1.55; }
+.combat-log .entry { padding: .25rem 0; border-bottom: 1px dashed rgba(95,113,130,.15); }
+.combat-log .entry.player { color: var(--text-primary); }
+.combat-log .entry.enemy  { color: var(--text-muted); }
+.combat-log .entry.neutral { color: var(--accent-glow); font-style: italic; }
+.combat-log .entry .arrow { color: var(--accent-glow); margin-right: 4px; }
+
+.system-message { margin-top: 1rem; padding: .5rem .75rem; border-left: 2px solid var(--accent-blood);
+  font-family: "Special Elite", monospace; font-size: .85rem; color: var(--accent-glow); display: none; }
+.system-message.show { display: block; }
+
+/* Board */
+.battle-board { grid-column: 2 / 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; perspective: 1200px; }
+.board-row { display: flex; gap: .75rem; }
+.board-row.enemy { transform: rotateX(8deg); }
+.board-row.player { transform: rotateX(-8deg); }
+.board-divider { width: 70%; height: 1px; background: var(--accent-blood); opacity: .5; }
+
+/* Hand area */
+.battle-hand-area { grid-column: 1 / -1; }
+.battle-actions { display: flex; gap: .75rem; justify-content: center; margin-bottom: .5rem; font-family: "VT323", monospace; font-size: 1rem; }
+.battle-hand { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; padding-bottom: .25rem; }
+
+/* Blood indicator */
+.blood-pool {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: .25rem .5rem; border: 1px solid var(--accent-blood);
+  font-family: "VT323", monospace;
+}
+.blood-pool .drop { color: var(--accent-glow); font-size: 1.3rem; }
+.blood-pool .val { color: var(--accent-glow); font-size: 1.5rem; }
+.blood-pool .max { color: var(--text-muted); font-size: 1rem; }
+
+/* Mulligan modal */
+.mulligan-list { display: flex; gap: .75rem; flex-wrap: wrap; justify-content: center; padding: 1rem 0; }
+.mulligan-hint { font-family: "Special Elite", monospace; text-align: center; font-size: .9rem; color: var(--text-muted); margin: 0 0 .5rem; }
+
+/* Game over */
+.gameover { width: 100%; height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; background-color: var(--surface-shadow); }
+.gameover .title { font-family: "IM Fell English SC", serif; font-size: 5rem; letter-spacing: .4em; color: var(--accent-blood); }
+.gameover .psych { font-family: "Special Elite", monospace; font-size: .9rem; color: var(--text-muted); margin-top: 1.5rem; opacity: .6; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0a0a0d; }
+::-webkit-scrollbar-thumb { background: var(--border-diegetic); }
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .battle { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr auto; }
+  .battle-side { max-height: 180px; }
+  .safe-body { grid-template-columns: 1fr; }
+}

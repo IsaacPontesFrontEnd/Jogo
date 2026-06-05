@@ -1,0 +1,8 @@
+/* Reset and base scene container styles for Vigilia */
+.App {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--bg-global);
+    position: relative;
+}
