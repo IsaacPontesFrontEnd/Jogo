@@ -103,10 +103,10 @@ function renderMulligan(lang) {
   };
   return h("div", { class: "modal-backdrop", "data-testid": "mulligan-modal" },
     h("div", { class: "modal" },
-      h("h3", {}, lang === "pt" ? "MÃ£o Inicial" : "Opening Hand"),
+      h("h3", {}, lang === "pt" ? "M?o Inicial" : "Opening Hand"),
       h("p", { class: "mulligan-hint" },
         lang === "pt"
-          ? `Selecione atÃ© ${MULLIGAN_MAX} cartas para trocar (${mulliganSelections.length}/${MULLIGAN_MAX}).`
+          ? `Selecione at? ${MULLIGAN_MAX} cartas para trocar (${mulliganSelections.length}/${MULLIGAN_MAX}).`
           : `Choose up to ${MULLIGAN_MAX} cards to replace (${mulliganSelections.length}/${MULLIGAN_MAX}).`),
       h("div", { class: "mulligan-list" },
         ...state.hand.map((c) =>
@@ -122,7 +122,7 @@ function renderMulligan(lang) {
         h("button", { class: "btn-diegetic btn-bracket", "data-testid": "mulligan-confirm", onclick: confirm },
           lang === "pt" ? "Confirmar Troca" : "Confirm Swap"),
         h("button", { class: "btn-diegetic", "data-testid": "mulligan-skip", onclick: skip },
-          lang === "pt" ? "Manter MÃ£o" : "Keep Hand"),
+          lang === "pt" ? "Manter M?o" : "Keep Hand"),
       ),
     ),
   );
@@ -162,8 +162,8 @@ function renderCardInfo(lang) {
   const lastActionEl = h("div", { class: "last-action", "data-testid": "last-action" },
     h("div", { class: "la-side " + (la?.side || "neutral") }, la ? labelForSide(la.side, lang) : ""),
     la
-      ? h("div", { class: "la-text" }, "â†’ " + translateLogEntry(la, lang))
-      : h("div", { class: "empty" }, lang === "pt" ? "Nenhuma aÃ§Ã£o ainda." : "No action yet."),
+      ? h("div", { class: "la-text" }, h("span", { class: "arrow", html: "&#8594;" }), " " + translateLogEntry(la, lang))
+      : h("div", { class: "empty" }, lang === "pt" ? "Nenhuma a??o ainda." : "No action yet."),
   );
 
   // system message placeholder (future psych hooks)
@@ -184,7 +184,7 @@ function renderCombatLog(lang) {
     h("div", { class: "combat-log", "data-testid": "combat-log" },
       ...[...state.log].reverse().map((e) =>
         h("div", { class: "entry " + (e.side || "neutral") },
-          e.side && e.side !== "neutral" ? h("span", { class: "arrow" }, "â–¸") : null,
+          e.side && e.side !== "neutral" ? h("span", { class: "arrow", html: "&#9656;" }) : null,
           translateLogEntry(e, lang),
         ),
       ),
@@ -202,22 +202,23 @@ export function renderBattle() {
   if (!state.mulliganDone) {
     return h("section", { class: "battle", "data-testid": "battle-scene" },
       h("div", { class: "battle-top" },
-        h("div", { class: "hp-block enemy" }, h("span", { class: "icon" }, "â˜ "), h("div", {},
+        h("div", { class: "hp-block enemy" }, h("span", { class: "icon", html: "&#9760;" }), h("div", {},
           h("span", { class: "label" }, lang === "pt" ? "INIMIGO" : "ENEMY"),
           h("span", { class: "value" }, String(state.enemyHp)), h("span", { class: "max" }, " / " + state.enemyMaxHp)
         )),
         h("div", { class: "turn-indicator player" }, h("div", { class: "label" }, lang === "pt" ? "MULLIGAN" : "MULLIGAN")),
         h("div", { class: "hp-block player" }, h("div", {},
-          h("span", { class: "label" }, lang === "pt" ? "VOCÃŠ" : "YOU"),
+          h("span", { class: "label" }, lang === "pt" ? "VOC?" : "YOU"),
           h("span", { class: "value" }, String(state.playerHp)), h("span", { class: "max" }, " / " + state.playerMaxHp),
-        ), h("span", { class: "icon" }, "â¤")),
+        ), h("span", { class: "icon", html: "&#10084;" })),
       ),
       renderMulligan(lang),
     );
   }
 
   // Card selection / play
-  const onCardClick = (card) => {
+  const onCardClick = (card, event = null) => {
+    if (event) { event.preventDefault(); event.stopPropagation(); }
     if (state.turn !== "player" || state.winner) return;
     sfxClick();
     if (cyclingMode) {
@@ -234,7 +235,8 @@ export function renderBattle() {
     rerender();
   };
 
-  const onSlotClick = (idx) => {
+  const onSlotClick = (idx, event = null) => {
+    if (event) { event.preventDefault(); event.stopPropagation(); }
     if (state.turn !== "player" || state.winner) return;
     if (!selectedCardUid) return;
     if (state.playerBoard[idx]) return;
@@ -275,6 +277,12 @@ export function renderBattle() {
     ? (lang === "pt" ? "SEU TURNO" : "YOUR TURN")
     : (lang === "pt" ? "TURNO DO INIMIGO" : "ENEMY TURN");
 
+  const onPlayerBoardPointerDown = (event) => {
+    const slot = event.target.closest("[data-player-slot]");
+    if (!slot) return;
+    onSlotClick(Number(slot.dataset.playerSlot), event);
+  };
+
   const enemyBoard = h("div", { class: "board-row enemy", "data-testid": "enemy-board" },
     ...state.enemyBoard.map((c, i) =>
       h("div", { class: "h-slot small" },
@@ -288,15 +296,16 @@ export function renderBattle() {
     ),
   );
 
-  const playerBoard = h("div", { class: "board-row player", "data-testid": "player-board" },
+  const playerBoard = h("div", { class: "board-row player", "data-testid": "player-board", onpointerdown: onPlayerBoardPointerDown },
     ...state.playerBoard.map((c, i) => {
       const selected = selectedCardUid ? state.hand.find((card) => card.uid === selectedCardUid) : null;
       const isTarget = !!selected && !c && canAfford(state, selected) && state.turn === "player";
       return h("div", {
         class: "h-slot small " + (isTarget ? "valid-target" : ""),
         "data-testid": `player-slot-${i}`,
-        onclick: () => onSlotClick(i),
-        onmousedown: () => onSlotClick(i),
+        "data-player-slot": String(i),
+        onclick: (event) => onSlotClick(i, event),
+        onpointerdown: (event) => onSlotClick(i, event),
       },
         c ? renderCard(c, {
           small: true, lang,
@@ -315,9 +324,8 @@ export function renderBattle() {
         small: true, lang,
         disabled: state.turn !== "player" || !!state.winner,
         selected: selectedCardUid === c.uid,
-        onClick: () => onCardClick(c),
-        onHover: () => { hoveredCardUid = c.uid; rerender(); },
-        onLeave: () => { if (hoveredCardUid === c.uid) { hoveredCardUid = null; rerender(); } },
+        onClick: (event) => onCardClick(c, event),
+        onPointerDown: (event) => onCardClick(c, event),
         testId: `hand-card-${c.uid}`,
       });
     }),
@@ -325,7 +333,7 @@ export function renderBattle() {
 
   const actions = h("div", { class: "battle-actions" },
     h("div", { class: "blood-pool", "data-testid": "blood-pool" },
-      h("span", { class: "drop" }, "ðŸ©¸"),
+      h("span", { class: "drop", html: "&#129656;" }),
       h("span", { class: "val" }, String(state.playerBlood)),
       h("span", { class: "max" }, " / " + state.playerBloodMax),
     ),
@@ -345,7 +353,7 @@ export function renderBattle() {
         : (lang === "pt" ? "DESCARTAR (1/TURNO)" : "DISCARD (1/TURN)")),
     state.cycledThisTurn
       ? h("span", { class: "font-ui", style: { fontSize: ".8rem", color: "var(--text-muted)", alignSelf: "center" } },
-          lang === "pt" ? "(jÃ¡ usado)" : "(used)")
+          lang === "pt" ? "(j? usado)" : "(used)")
       : null,
   );
 
@@ -353,7 +361,7 @@ export function renderBattle() {
     // Top HUD
     h("div", { class: "battle-top" },
       h("div", { class: "hp-block enemy", "data-testid": "enemy-hp" },
-        h("span", { class: "icon" }, "â˜ "),
+        h("span", { class: "icon", html: "&#9760;" }),
         h("div", {},
           h("span", { class: "label" }, lang === "pt" ? "INIMIGO" : "ENEMY"),
           h("div", { style: { display: "flex", alignItems: "baseline", gap: "4px" } },
@@ -369,14 +377,14 @@ export function renderBattle() {
       ),
       h("div", { class: "hp-block player", "data-testid": "player-hp" },
         h("div", { style: { textAlign: "right" } },
-          h("span", { class: "label" }, lang === "pt" ? "VOCÃŠ" : "YOU"),
+          h("span", { class: "label" }, lang === "pt" ? "VOC?" : "YOU"),
           h("div", { style: { display: "flex", alignItems: "baseline", gap: "4px", justifyContent: "flex-end" } },
             h("span", { class: "value" }, String(state.playerHp)),
             h("span", { class: "max" }, " / " + state.playerMaxHp),
           ),
           h("div", { class: "hp-bar player" }, h("div", { class: "fill", style: { width: pctP + "%" } })),
         ),
-        h("span", { class: "icon" }, "â¤"),
+        h("span", { class: "icon", html: "&#10084;" }),
       ),
     ),
     // Left side: card info

@@ -1,4 +1,4 @@
-// Pixel sprite + Card renderers for the standalone vanilla version.
+﻿// Pixel sprite + Card renderers for the standalone vanilla version.
 import { h, svgEl } from "./render.js";
 import { PALETTE, CARDS } from "./data/cards.js";
 
@@ -35,9 +35,9 @@ export function pixelSprite(sprite, size = 64) {
 }
 
 // card: instance with currentAttack/currentHealth.
-// opts: { onClick, onHover, onLeave, selected, disabled, small, lang, testId }
+// opts: { onClick, onPointerDown, onHover, onLeave, selected, disabled, small, lang, testId }
 export function renderCard(card, opts = {}) {
-  const { onClick, onHover, onLeave, selected, disabled, small, lang = "pt", testId } = opts;
+  const { onClick, onPointerDown, onHover, onLeave, selected, disabled, small, lang = "pt", testId } = opts;
   if (!card) return h("div");
   const def = CARDS[card.id] || card;
   const name = def.name?.[lang] ?? def.name?.pt ?? def.id;
@@ -48,10 +48,11 @@ export function renderCard(card, opts = {}) {
       class: klass.trim(),
       "data-testid": testId || `card-${card.id}`,
       onclick: disabled ? null : onClick,
+      onpointerdown: disabled ? null : onPointerDown,
       onmouseenter: onHover,
       onmouseleave: onLeave,
     },
-    h("div", { class: "cost" }, h("span", { style: { fontSize: "10px" } }, "●"), String(def.cost)),
+    h("div", { class: "cost" }, h("span", { style: { fontSize: "10px" }, html: "&#9679;" }), String(def.cost)),
     h("div", { class: "name" }, name),
     h(
       "div",
@@ -63,3 +64,4 @@ export function renderCard(card, opts = {}) {
   );
   return el;
 }
+
