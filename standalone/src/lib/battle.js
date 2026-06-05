@@ -1,13 +1,13 @@
-// Battle engine. Updated:
-// - Blood is a capped mana-style resource: turn N grants min(N, BLOOD_CAP) blood
-//   refreshed at the start of each player turn.
+﻿// Battle engine. Updated:
+// - Blood is a fixed battle resource: starts at 10/10 and only decreases when
+//   cards are played.
 // - Playing a card simply costs `card.cost` blood (no sacrifice flow).
 // - Cycle action: once per turn, discard one card and draw one.
 // - Mulligan: at battle start, the player may swap up to 2 cards in opening hand.
 
 import { CARDS } from "../data/cards.js";
 
-export const BLOOD_CAP = 4;
+export const BLOOD_MAX = 10;
 export const MULLIGAN_MAX = 2;
 
 let _uid = 1;
@@ -37,8 +37,8 @@ export function createBattle(playerDeckIds, enemyDeckIds, playerMaxHp = 10) {
     enemyHp: 6 + enemyDeckIds.length,
     playerMaxHp,
     enemyMaxHp: 6 + enemyDeckIds.length,
-    playerBlood: 1,
-    playerBloodMax: 1,
+    playerBlood: BLOOD_MAX,
+    playerBloodMax: BLOOD_MAX,
     playerBoard: [null, null, null, null],
     enemyBoard: [null, null, null, null],
     hand: startingHand,
@@ -212,11 +212,10 @@ export function runEnemyTurn(state) {
 
   s.turn = "player";
   s.turnNumber++;
-  // Refresh blood pool: capped at BLOOD_CAP
-  s.playerBloodMax = Math.min(s.turnNumber, BLOOD_CAP);
-  s.playerBlood = s.playerBloodMax;
   s.cycledThisTurn = false;
   s = drawCard(s);
 
   return s;
 }
+
+

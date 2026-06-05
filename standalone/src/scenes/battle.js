@@ -1,4 +1,4 @@
-import { h } from "../render.js";
+﻿import { h } from "../render.js";
 import { game, setScene, setRun, commitSave, triggerGlitch } from "../main.js";
 import { t } from "../data/translations.js";
 import { CARDS } from "../data/cards.js";
@@ -103,10 +103,10 @@ function renderMulligan(lang) {
   };
   return h("div", { class: "modal-backdrop", "data-testid": "mulligan-modal" },
     h("div", { class: "modal" },
-      h("h3", {}, lang === "pt" ? "Mão Inicial" : "Opening Hand"),
+      h("h3", {}, lang === "pt" ? "MÃ£o Inicial" : "Opening Hand"),
       h("p", { class: "mulligan-hint" },
         lang === "pt"
-          ? `Selecione até ${MULLIGAN_MAX} cartas para trocar (${mulliganSelections.length}/${MULLIGAN_MAX}).`
+          ? `Selecione atÃ© ${MULLIGAN_MAX} cartas para trocar (${mulliganSelections.length}/${MULLIGAN_MAX}).`
           : `Choose up to ${MULLIGAN_MAX} cards to replace (${mulliganSelections.length}/${MULLIGAN_MAX}).`),
       h("div", { class: "mulligan-list" },
         ...state.hand.map((c) =>
@@ -122,7 +122,7 @@ function renderMulligan(lang) {
         h("button", { class: "btn-diegetic btn-bracket", "data-testid": "mulligan-confirm", onclick: confirm },
           lang === "pt" ? "Confirmar Troca" : "Confirm Swap"),
         h("button", { class: "btn-diegetic", "data-testid": "mulligan-skip", onclick: skip },
-          lang === "pt" ? "Manter Mão" : "Keep Hand"),
+          lang === "pt" ? "Manter MÃ£o" : "Keep Hand"),
       ),
     ),
   );
@@ -162,8 +162,8 @@ function renderCardInfo(lang) {
   const lastActionEl = h("div", { class: "last-action", "data-testid": "last-action" },
     h("div", { class: "la-side " + (la?.side || "neutral") }, la ? labelForSide(la.side, lang) : ""),
     la
-      ? h("div", { class: "la-text" }, "→ " + translateLogEntry(la, lang))
-      : h("div", { class: "empty" }, lang === "pt" ? "Nenhuma ação ainda." : "No action yet."),
+      ? h("div", { class: "la-text" }, "â†’ " + translateLogEntry(la, lang))
+      : h("div", { class: "empty" }, lang === "pt" ? "Nenhuma aÃ§Ã£o ainda." : "No action yet."),
   );
 
   // system message placeholder (future psych hooks)
@@ -184,7 +184,7 @@ function renderCombatLog(lang) {
     h("div", { class: "combat-log", "data-testid": "combat-log" },
       ...[...state.log].reverse().map((e) =>
         h("div", { class: "entry " + (e.side || "neutral") },
-          e.side && e.side !== "neutral" ? h("span", { class: "arrow" }, "▸") : null,
+          e.side && e.side !== "neutral" ? h("span", { class: "arrow" }, "â–¸") : null,
           translateLogEntry(e, lang),
         ),
       ),
@@ -202,15 +202,15 @@ export function renderBattle() {
   if (!state.mulliganDone) {
     return h("section", { class: "battle", "data-testid": "battle-scene" },
       h("div", { class: "battle-top" },
-        h("div", { class: "hp-block enemy" }, h("span", { class: "icon" }, "☠"), h("div", {},
+        h("div", { class: "hp-block enemy" }, h("span", { class: "icon" }, "â˜ "), h("div", {},
           h("span", { class: "label" }, lang === "pt" ? "INIMIGO" : "ENEMY"),
           h("span", { class: "value" }, String(state.enemyHp)), h("span", { class: "max" }, " / " + state.enemyMaxHp)
         )),
         h("div", { class: "turn-indicator player" }, h("div", { class: "label" }, lang === "pt" ? "MULLIGAN" : "MULLIGAN")),
         h("div", { class: "hp-block player" }, h("div", {},
-          h("span", { class: "label" }, lang === "pt" ? "VOCÊ" : "YOU"),
+          h("span", { class: "label" }, lang === "pt" ? "VOCÃŠ" : "YOU"),
           h("span", { class: "value" }, String(state.playerHp)), h("span", { class: "max" }, " / " + state.playerMaxHp),
-        ), h("span", { class: "icon" }, "❤")),
+        ), h("span", { class: "icon" }, "â¤")),
       ),
       renderMulligan(lang),
     );
@@ -230,7 +230,6 @@ export function renderBattle() {
       }
       return;
     }
-    if (!canAfford(state, card)) return;
     selectedCardUid = selectedCardUid === card.uid ? null : card.uid;
     rerender();
   };
@@ -239,6 +238,8 @@ export function renderBattle() {
     if (state.turn !== "player" || state.winner) return;
     if (!selectedCardUid) return;
     if (state.playerBoard[idx]) return;
+    const selected = state.hand.find((c) => c.uid === selectedCardUid);
+    if (!selected || !canAfford(state, selected)) return;
     const next = playCard(state, selectedCardUid, idx);
     if (next !== state) {
       state = next;
@@ -289,11 +290,13 @@ export function renderBattle() {
 
   const playerBoard = h("div", { class: "board-row player", "data-testid": "player-board" },
     ...state.playerBoard.map((c, i) => {
-      const isTarget = selectedCardUid && !c;
+      const selected = selectedCardUid ? state.hand.find((card) => card.uid === selectedCardUid) : null;
+      const isTarget = !!selected && !c && canAfford(state, selected) && state.turn === "player";
       return h("div", {
         class: "h-slot small " + (isTarget ? "valid-target" : ""),
         "data-testid": `player-slot-${i}`,
         onclick: () => onSlotClick(i),
+        onmousedown: () => onSlotClick(i),
       },
         c ? renderCard(c, {
           small: true, lang,
@@ -310,7 +313,7 @@ export function renderBattle() {
       const affordable = canAfford(state, c) || cyclingMode;
       return renderCard(c, {
         small: true, lang,
-        disabled: (!affordable && !cyclingMode) || state.turn !== "player" || !!state.winner,
+        disabled: state.turn !== "player" || !!state.winner,
         selected: selectedCardUid === c.uid,
         onClick: () => onCardClick(c),
         onHover: () => { hoveredCardUid = c.uid; rerender(); },
@@ -322,7 +325,7 @@ export function renderBattle() {
 
   const actions = h("div", { class: "battle-actions" },
     h("div", { class: "blood-pool", "data-testid": "blood-pool" },
-      h("span", { class: "drop" }, "🩸"),
+      h("span", { class: "drop" }, "ðŸ©¸"),
       h("span", { class: "val" }, String(state.playerBlood)),
       h("span", { class: "max" }, " / " + state.playerBloodMax),
     ),
@@ -342,7 +345,7 @@ export function renderBattle() {
         : (lang === "pt" ? "DESCARTAR (1/TURNO)" : "DISCARD (1/TURN)")),
     state.cycledThisTurn
       ? h("span", { class: "font-ui", style: { fontSize: ".8rem", color: "var(--text-muted)", alignSelf: "center" } },
-          lang === "pt" ? "(já usado)" : "(used)")
+          lang === "pt" ? "(jÃ¡ usado)" : "(used)")
       : null,
   );
 
@@ -350,7 +353,7 @@ export function renderBattle() {
     // Top HUD
     h("div", { class: "battle-top" },
       h("div", { class: "hp-block enemy", "data-testid": "enemy-hp" },
-        h("span", { class: "icon" }, "☠"),
+        h("span", { class: "icon" }, "â˜ "),
         h("div", {},
           h("span", { class: "label" }, lang === "pt" ? "INIMIGO" : "ENEMY"),
           h("div", { style: { display: "flex", alignItems: "baseline", gap: "4px" } },
@@ -366,14 +369,14 @@ export function renderBattle() {
       ),
       h("div", { class: "hp-block player", "data-testid": "player-hp" },
         h("div", { style: { textAlign: "right" } },
-          h("span", { class: "label" }, lang === "pt" ? "VOCÊ" : "YOU"),
+          h("span", { class: "label" }, lang === "pt" ? "VOCÃŠ" : "YOU"),
           h("div", { style: { display: "flex", alignItems: "baseline", gap: "4px", justifyContent: "flex-end" } },
             h("span", { class: "value" }, String(state.playerHp)),
             h("span", { class: "max" }, " / " + state.playerMaxHp),
           ),
           h("div", { class: "hp-bar player" }, h("div", { class: "fill", style: { width: pctP + "%" } })),
         ),
-        h("span", { class: "icon" }, "❤"),
+        h("span", { class: "icon" }, "â¤"),
       ),
     ),
     // Left side: card info
@@ -396,3 +399,5 @@ export function renderBattle() {
 
 // reset battle state when navigating away
 export function resetBattleState() { resetBattle(); }
+
+

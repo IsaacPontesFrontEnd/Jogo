@@ -1,8 +1,10 @@
-:root {
+﻿:root {
   --bg-global: #050508;
   --surface-safe: #15161a;
   --surface-shadow: #020203;
   --text-primary: #e2dcd0;
+  --battle-text: #f4efe5;
+  --battle-muted: #c7bdaa;
   --text-muted: #5f7182;
   --accent-blood: #8a251c;
   --accent-glow: #a83025;
@@ -166,13 +168,14 @@ button { font: inherit; }
   width: 132px; height: 192px;
   border: 1px dashed var(--border-diegetic);
   background: rgba(5,5,8,.5); display: flex; align-items: center; justify-content: center;
-  transition: all .2s;
+  transition: all .2s; cursor: default;
 }
 .h-slot.small { width: 104px; height: 152px; }
 .h-slot.valid-target {
   border-color: var(--accent-glow);
   box-shadow: inset 0 0 14px var(--accent-blood);
   animation: pulse-target 1s infinite;
+  cursor: pointer;
 }
 @keyframes pulse-target { 0%,100% { opacity: 1; } 50% { opacity: .6; } }
 
@@ -304,6 +307,24 @@ button { font: inherit; }
 .combat-log .entry.enemy  { color: var(--text-muted); }
 .combat-log .entry.neutral { color: var(--accent-glow); font-style: italic; }
 .combat-log .entry .arrow { color: var(--accent-glow); margin-right: 4px; }
+.battle .hp-block .value,
+.battle .card-info .ci-name,
+.battle .card-info .ci-desc,
+.battle .card-info .empty,
+.battle .last-action .la-text,
+.battle .last-action .empty,
+.battle .combat-log .entry,
+.battle .turn-indicator .turn-num,
+.battle .blood-pool .max {
+  color: var(--battle-text);
+}
+
+.battle .hp-block .max,
+.battle .hp-block .label,
+.battle .last-action .la-side.enemy,
+.battle .combat-log .entry.enemy {
+  color: var(--battle-muted);
+}
 
 .system-message { margin-top: 1rem; padding: .5rem .75rem; border-left: 2px solid var(--accent-blood);
   font-family: "Special Elite", monospace; font-size: .85rem; color: var(--accent-glow); display: none; }
@@ -352,3 +373,4 @@ button { font: inherit; }
   .battle-side { max-height: 180px; }
   .safe-body { grid-template-columns: 1fr; }
 }
+
